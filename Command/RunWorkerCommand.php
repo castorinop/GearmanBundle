@@ -179,12 +179,12 @@ EOF
                     // fire an event to take some action with failed job
                     $lastOutput = 'Exception -> ' . $e->getMessage() . " with last output:\n\n" . $lastOutput;
                     $args = $self->prepareCommandArguments(unserialize($gmj->workload()), false);
-                    $event = new JobFailedEvent($job, $args, $lastOutput);
+                    $event = new JobFailedEvent($job, $args, $lastOutput, $e);
                     $disp->dispatch(JobFailedEvent::NAME, $event);
                 }
                 return false;
             }
-            $event = new JobEndEvent($job, $gmj->workload());
+            $event = new JobEndEvent($job, $gmj->workload(), $lastOutput);
             $disp->dispatch(JobEndEvent::NAME, $event);
 
             $gmj->sendComplete(null);

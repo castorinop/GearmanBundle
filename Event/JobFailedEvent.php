@@ -9,12 +9,13 @@ class JobFailedEvent extends Event
 {
     const NAME = 'supertag_gearman.job_failed_event';
 
-    public $job, $arguments, $output;
+    public $job, $arguments, $output, $exception;
 
-    public function __construct(GearmanJobCommandInterface $job, array $arguments, $output)
+    public function __construct(GearmanJobCommandInterface $job, array $arguments, $output, $exception)
     {
         $this->job = $job;
         $this->arguments = $arguments;
         $this->output = $output;
+        $this->exception = $exception;
     }
 }
