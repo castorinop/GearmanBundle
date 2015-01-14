@@ -27,4 +27,17 @@ final class Workload
     {
         return serialize($this->parameters);
     }
+
+    public function getParams() {
+        $params = array();
+        foreach ($this->parameters as $param => $val) {
+            if ($param && '-' === $param[0]) {
+                $params[] = $param . ('' != $val ? '='.$val : '');
+            } else {
+                $params[] = $val;
+            }
+        }
+        return $params;
+        #return $this->parameters;
+    }
 }
