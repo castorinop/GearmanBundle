@@ -3,6 +3,8 @@
 namespace Supertag\Bundle\GearmanBundle;
 
 use GearmanClient;
+use Supertag\Bundle\GearmanBundle\Event\JobQueueEvent;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * A proxy for gearman client, we might need a namespace
@@ -13,6 +15,7 @@ class Client
     private $gmc;
     private $servers;
     private $namespace;
+    private $dispatcher;
 
     public function __construct($servers, $namespace)
     {
@@ -27,6 +30,10 @@ class Client
             $this->gmc->addServers($this->servers);
         }
     }
+
+    public function setEventDispatcher(EventDispatcherInterface $dispatcher) {
+	$this->dispatcher = $dispatcher;
+   }
 
     /**
      * Get the php extension gearman client
@@ -50,6 +57,13 @@ class Client
         return $this->namespace . $name;
     }
 
+    public function sendEvent($jobName, Workload $workload)
+    {
+    	$event = new JobQueueEvent($this->getJobName($jobName), $workload);
+    	$this->dispatcher->dispatch(JobQueueEvent::NAME, $event);
+    	
+    }
+
     /**
      * Schedules a background job
      *
@@ -60,6 +74,9 @@ class Client
     public function doBackground($jobName, Workload $workload)
     {
         $this->connect();
+        
+        $this->sendEvent($jobName, $workload);
+        
         return $this->gmc->doBackground($this->getJobName($jobName), (string)$workload);
     }
 
@@ -86,6 +103,9 @@ class Client
     public function doLowBackground($jobName, Workload $workload)
     {
         $this->connect();
+        
+        $this->sendEvent($jobName, $workload);
+        
         return $this->gmc->doLowBackground($this->getJobName($jobName), (string)$workload);
     }
 
